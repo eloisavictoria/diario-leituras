@@ -1,0 +1,184 @@
+openapi: 3.0.3
+info:
+  title: Diário de Leituras API
+  version: 1.0.0
+  description: API REST para registrar e gerenciar leituras pessoais. Os dados vivem somente durante a execução da API.
+servers:
+  - url: http://localhost:3001
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ReadingInput:
+      type: object
+      additionalProperties: false
+      required: [title, author, genre, opinion, rating, recommend]
+      properties:
+        title: { type: string, minLength: 1, example: O Hobbit }
+        author: { type: string, minLength: 1, example: J. R. R. Tolkien }
+        genre:
+          type: string
+          enum: [Romance, Fantasia, Ficção científica, Suspense, Terror, Biografia, Desenvolvimento pessoal, Tecnologia, Outros]
+        opinion: { type: string, minLength: 1, example: Gostei muito da aventura. }
+        rating: { type: integer, minimum: 1, maximum: 5, example: 5 }
+        recommend: { type: boolean, example: true }
+    Reading:
+      allOf:
+        - $ref: '#/components/schemas/ReadingInput'
+        - type: object
+          required: [_id, userId, createdAt, updatedAt]
+          properties:
+            _id: { type: string, example: 507f1f77bcf86cd799439011 }
+            userId: { type: string, example: 507f191e810c19729de860ea }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+  responses:
+    Unauthorized:
+      description: Token ausente, inválido ou expirado.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Leitura inexistente ou pertencente a outro usuário.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    BadRequest:
+      description: Dados inválidos.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+paths:
+  /api/health:
+    get:
+      tags: [Sistema]
+      summary: Verifica se a API está ativa
+      responses:
+        '200': { description: Ativa }
+  /api/genres:
+    get:
+      tags: [Sistema]
+      summary: Lista os gêneros permitidos
+      responses:
+        '200':
+          description: Gêneros disponíveis
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: string }
+  /api/auth/login:
+    post:
+      tags: [Autenticação]
+      summary: Autentica um usuário de teste
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email, example: ana@example.com }
+                password: { type: string, format: password, example: Leitura123! }
+      responses:
+        '200':
+          description: Login efetuado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+                  user:
+                    type: object
+                    properties:
+                      id: { type: string }
+                      name: { type: string }
+                      email: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { description: Limite de tentativas excedido }
+  /api/readings:
+    get:
+      tags: [Leituras]
+      security: [{ bearerAuth: [] }]
+      summary: Lista apenas leituras do usuário autenticado
+      responses:
+        '200':
+          description: Lista de leituras
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Reading' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Leituras]
+      security: [{ bearerAuth: [] }]
+      summary: Cadastra uma leitura do usuário autenticado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReadingInput' }
+      responses:
+        '201':
+          description: Leitura criada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Reading' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/readings/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+        description: Identificador da leitura
+    get:
+      tags: [Leituras]
+      security: [{ bearerAuth: [] }]
+      summary: Exibe detalhes de uma leitura própria
+      responses:
+        '200':
+          description: Leitura encontrada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Reading' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Leituras]
+      security: [{ bearerAuth: [] }]
+      summary: Substitui os dados editáveis de uma leitura própria
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReadingInput' }
+      responses:
+        '200':
+          description: Leitura atualizada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Reading' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Leituras]
+      security: [{ bearerAuth: [] }]
+      summary: Exclui leitura própria (confirmação é responsabilidade da interface Web)
+      responses:
+        '204': { description: Leitura excluída; corpo vazio }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
