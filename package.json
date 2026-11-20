@@ -8,5 +8,11 @@
     "start": "npm run start --prefix backend",
     "build": "npm run build --prefix frontend"
   },
-  "devDependencies": {"concurrently":"^9.1.2"}
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "cypress": "^16.3.0"
+  },
+  "allowScripts": {
+    "cypress@16.3.0": true
+  }
 }
