@@ -2,7 +2,7 @@ describe('Cadastro de Leitura API Tests', () => {
   let token = '';
 
   beforeEach(() => {
-    cy.fazerLoginCredenciaisValidas().then((loginToken) => {
+    cy.fazerLoginCredenciaisValidas('ana@example.com', 'Leitura123!').then((loginToken) => {
       token = loginToken;
     });
   });
@@ -149,5 +149,4 @@ describe('Cadastro de Leitura API Tests', () => {
     });
   });
 
- 
 });
