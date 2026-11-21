@@ -19,3 +19,11 @@ Cypress.Commands.add('fazerLoginCredenciaisInvalidas', (email, password) => {
       expect(response.body.error).to.equal('E-mail ou senha inválidos.');
     });
 })
+
+Cypress.Commands.add('fazerLogin', (email, password) => {
+  cy.visit('http://localhost:5173/login');
+  cy.get('#email').type(email);
+  cy.get('#password').type(password);
+  cy.get('button[type="submit"]').click();
+  cy.get('h1').should('contain', 'Minha biblioteca');
+})
