@@ -1,10 +1,10 @@
 {
     "valida":{
-        "usuario": "ana@example.com",
-        "senha": "Leitura123!"
+        "email": "ana@example.com",
+        "password": "Leitura123!"
     },
     "invalida":{
-        "usuario": "bruno@example.com",
-        "senha": "654321"
+        "email": "bruno@example.com",
+        "password": "654321"
     }
 }
