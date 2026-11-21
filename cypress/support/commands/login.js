@@ -1,7 +1,7 @@
-Cypress.Commands.add('fazerLoginCredenciaisValidas', () => {
+Cypress.Commands.add('fazerLoginCredenciaisValidas', (email, password) => {
     return cy.request('POST', '/api/auth/login', {
-      email: 'ana@example.com',
-      password: 'Leitura123!',
+      email: email,
+      password: password,
     }).then((response) => {
       expect(response.status).to.eq(200);
       expect(response.body).to.have.property('token').that.is.a('string').and.not.empty;
@@ -9,10 +9,13 @@ Cypress.Commands.add('fazerLoginCredenciaisValidas', () => {
     });
 })
 
-Cypress.Commands.add('fazerLoginCredenciaisInvalidas', () => {
-    cy.fixture('credenciais').then((login) => {
-      cy.get('#username').type(login.invalida.usuario)
-      cy.get('#senha').type(login.invalida.senha)
-    })
-    cy.get('#login-section > .btn').click();
+Cypress.Commands.add('fazerLoginCredenciaisInvalidas', (email, password) => {
+     return cy.request('POST', '/api/auth/login', {
+      email: email,
+      password: password,
+    }).then((response) => {
+      expect(response.status).to.eq(401);
+      expect(response.body).to.have.property('error');
+      expect(response.body.error).to.equal('E-mail ou senha inválidos.');
+    });
 })
