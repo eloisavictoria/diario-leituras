@@ -111,5 +111,5 @@ describe('Edição de Leitura Web Tests', () => {
           cy.get('.opinion-card').should('contain', 'Opinião original da leitura.');
           cy.get('h1').should('not.contain', 'Alteração cancelada');
         });
-      });
+  });
 });
