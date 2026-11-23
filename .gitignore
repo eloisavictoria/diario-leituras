@@ -6,3 +6,9 @@ coverage/
 *.log
 
 .cache/
+cypress\screenshots
+cypress\screenshots\api tests
+cypress\screenshots\web tests
+cypress/reports/
+html-report.html
+

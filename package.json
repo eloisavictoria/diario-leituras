@@ -7,12 +7,15 @@
     "install:all": "npm install && npm install --prefix backend && npm install --prefix frontend",
     "start": "npm run start --prefix backend",
     "build": "npm run build --prefix frontend",
+    "cy:run": "npx cypress run",
+    "cy:open": "npx cypress open",
     "perf:login": "k6 run performance/login.js",
     "perf:cadastro": "k6 run performance/cadastro.js"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
-    "cypress": "^16.3.0"
+    "cypress": "^16.3.0",
+    "cypress-mochawesome-reporter": "^5.0.0"
   },
   "allowScripts": {
     "cypress@16.3.0": true
