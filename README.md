@@ -2,7 +2,7 @@
 
 Uma aplicação Web com API REST para registrar livros já lidos, consultar uma biblioteca pessoal, registrar opiniões e avaliações, editar informações e excluir leituras. As leituras são privadas por usuário autenticado.
 
-> Projeto didático para atividades posteriores de Quality Assurance. **Não há testes automatizados, scripts de teste ou suítes de teste neste repositório**, conforme requisito do projeto.
+> Projeto didático para atividades de Quality Assurance, com testes funcionais em Cypress e um cenário de performance da API em k6.
 
 ## Tecnologias
 
@@ -55,6 +55,63 @@ Para compilar o frontend:
 ```bash
 npm run build --prefix frontend
 ```
+
+## Testes de performance com k6
+
+Instale o [k6](https://grafana.com/docs/k6/latest/set-up/install-k6/) separadamente do npm e inicie a API em um terminal:
+
+```powershell
+npm.cmd run dev --prefix backend
+```
+
+Em outro terminal, execute na raiz do projeto:
+
+```powershell
+npm.cmd run perf:login
+```
+
+O cenário em `performance/login.js` envia 10 requisições de login, uma por vez, usando a conta de demonstração Ana. Ele verifica o status HTTP e a presença do token; o limiar inicial exige p90 abaixo de 2 segundos e menos de 1% de requisições com falha. A execução é curta e fica abaixo do limite de tentativas de login da API.
+
+A execução de cadastro pode ser feita com `npm.cmd run perf:cadastro`. Ela autentica uma vez e envia uma requisição para criar uma leitura. O registro fica no banco em memória até a API ser reiniciada.
+
+A URL padrão vem de `config/config.local.json` (`http://localhost:3001`). Para substituir a URL ou as credenciais sem editar arquivos, use variáveis de ambiente. No PowerShell:
+
+```powershell
+$env:BASE_URL = "http://localhost:3001"
+$env:K6_USER_EMAIL = "ana@example.com"
+$env:K6_USER_PASSWORD = "Leitura123!"
+npm.cmd run perf:login
+```
+
+Use o teste somente contra uma instância sua ou para a qual tenha autorização.
+
+### Abrir o dashboard ao vivo
+
+O k6 inclui um dashboard local (não é necessário instalar o Grafana). Em um segundo terminal PowerShell, habilite-o e execute o teste:
+
+```powershell
+$env:K6_WEB_DASHBOARD = "true"
+$env:K6_WEB_DASHBOARD_OPEN = "true"
+$env:K6_WEB_DASHBOARD_PERIOD = "1s"
+npm.cmd run perf:login
+```
+
+O navegador abre o dashboard em <http://localhost:5665>. O cenário atual dura cerca de 10 segundos; o intervalo de atualização de 1 segundo permite visualizar gráficos mesmo nesse teste curto. Feche a aba do dashboard para o processo do k6 terminar.
+
+### Exportar um relatório HTML
+
+Para guardar e abrir o resultado depois, use um terminal PowerShell novo (ou defina `K6_WEB_DASHBOARD_OPEN` como `false`):
+
+```powershell
+$env:K6_WEB_DASHBOARD = "true"
+$env:K6_WEB_DASHBOARD_OPEN = "false"
+$env:K6_WEB_DASHBOARD_PERIOD = "1s"
+$env:K6_WEB_DASHBOARD_EXPORT = "performance-report.html"
+npm.cmd run perf:login
+Start-Process .\performance-report.html
+```
+
+O arquivo `performance-report.html` é criado na raiz do projeto. Consulte a [documentação oficial do dashboard k6](https://grafana.com/docs/k6/latest/results-output/web-dashboard/) para outras opções.
 
 **Importante:** o banco de dados funciona exclusivamente em memória. Ao **reiniciar o processo da API**, os dados inseridos ou alterados desaparecem e os usuários/livros de exemplo voltam a ser criados. A aplicação não é destinada a armazenar dados reais de forma duradoura.
 
