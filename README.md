@@ -2,18 +2,19 @@
 
 Uma aplicação Web com API REST para registrar livros já lidos, consultar uma biblioteca pessoal, registrar opiniões e avaliações, editar informações e excluir leituras. As leituras são privadas por usuário autenticado.
 
-> Projeto didático para atividades de Quality Assurance, com testes funcionais em Cypress e um cenário de performance da API em k6.
+> Projeto didático para atividades de Quality Assurance, com testes funcionais em Cypress e cenários de performance da API em k6.
 
 ## Tecnologias
 
 - **API:** Node.js 20+, Express 4, Mongoose 8, `mongodb-memory-server` 10, JWT (`jsonwebtoken`), `bcryptjs`, `helmet`, `cors`, `express-rate-limit`.
 - **Web:** React 18, Vite 6, React Router 6, Lucide Icons e CSS próprio.
+- **Testes de QA:** Cypress 16, `cypress-mochawesome-reporter` 5 e k6.
 - **Documentação:** OpenAPI 3.0 em YAML e Swagger UI.
 - **Versionamento:** Git.
 
 ## Pré-requisitos
 
-- Node.js 20 ou superior e npm.
+- Node.js 22 ou superior e npm para executar todas as ferramentas do projeto. O backend, isoladamente, requer Node.js 20 ou superior; o `cypress-mochawesome-reporter` 5 requer Node.js 22 ou superior.
 - Acesso à internet na primeira inicialização do backend: `mongodb-memory-server` baixa o executável do MongoDB quando ainda não está em cache. Não é necessário instalar MongoDB separadamente.
 
 ## Instalação
@@ -55,6 +56,28 @@ Para compilar o frontend:
 ```bash
 npm run build --prefix frontend
 ```
+
+## Testes funcionais com Cypress
+
+As suítes E2E cobrem a API e a interface Web. Inicie o backend e o frontend:
+
+```bash
+npm run dev
+```
+
+Em outro terminal, execute os testes em modo headless:
+
+```bash
+npm run cy:run
+```
+
+Para abrir a interface interativa do Cypress em vez de executar no modo headless:
+
+```bash
+npm run cy:open
+```
+
+Os testes ficam em `cypress/e2e/api tests/` e `cypress/e2e/web tests/`. O `cypress-mochawesome-reporter` gera um relatório HTML em `cypress/reports/html/index.html`, com os resultados e screenshots associados às falhas. Abra esse arquivo no navegador para consultar o relatório. Relatórios e screenshots são artefatos locais e não são versionados.
 
 ## Testes de performance com k6
 
@@ -220,7 +243,7 @@ curl -X POST http://localhost:3001/api/readings \
 - A API valida os dados independentemente do frontend, evita aceitar `userId` fornecido pelo cliente e exige autorização em todos os endpoints de leitura.
 - O frontend usa `sessionStorage` para manter o login durante a sessão da aba; em um produto real seria adequado rever a estratégia de armazenamento e implementar políticas de sessão mais completas.
 - Este é um projeto para estudo, não um serviço de produção. Não há cadastro de usuários, recuperação de senha, persistência após reinicialização nem infraestrutura de deploy.
-- Sem testes automatizados por decisão explícita do escopo. A verificação da API, do frontend e de cenários de QA poderá ser feita em uma etapa separada.
+- Os testes funcionais automatizados são executados com Cypress; os cenários de performance são executados separadamente com k6 e exigem que a API esteja em execução.
 
 ## Organização dos arquivos
 
@@ -239,6 +262,12 @@ diario-leituras/
 │   │   └── server.js
 │   ├── openapi.yaml
 │   └── .env.example
+├── cypress/
+│   ├── e2e/
+│   │   ├── api tests/
+│   │   └── web tests/
+│   ├── fixtures/
+│   └── support/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
@@ -247,6 +276,10 @@ diario-leituras/
 │   │   ├── services/
 │   │   └── styles.css
 │   └── vite.config.js
+├── performance/
+│   ├── cadastro.js
+│   └── login.js
+├── cypress.config.js
 └── README.md
 ```
 
